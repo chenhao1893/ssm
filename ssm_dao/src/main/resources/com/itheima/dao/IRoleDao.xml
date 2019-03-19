@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.IRoleDao">
+
+    <!--根据用户id查询角色-->
+    <resultMap id="role_permissions" type="com.itheima.domain.Role" autoMapping="true">
+        <collection property="permissions" column="id" autoMapping="true" ofType="com.itheima.domain.Permission"
+                    fetchType="lazy" select="com.itheima.dao.IPermissionDao.findPermissionsByRoleId"/>
+    </resultMap>
+    <select id="findByUserInfoId" resultMap="role_permissions" parameterType="String">
+        SELECT *
+        FROM ROLE
+        WHERE ID IN (SELECT ROLEID
+                     FROM USERINFO_ROLE
+                     WHERE USERID = #{id})
+    </select>
+
+    <!--查询所有角色-->
+    <select id="findAll" resultType="com.itheima.domain.Role">
+        SELECT *
+        FROM ROLE
+    </select>
+
+    <!--添加角色-->
+    <insert id="add" parameterType="com.itheima.domain.Role">
+        INSERT INTO ROLE (ROLENAME, ROLEDESC) VALUES (#{roleName}, #{roleDesc})
+    </insert>
+
+    <!--根据id查询role-->
+    <resultMap id="role_details" type="com.itheima.domain.Role" autoMapping="true">
+        <collection property="permissions" column="id" autoMapping="true" ofType="com.itheima.domain.Permission"
+                    fetchType="lazy" select="com.itheima.dao.IPermissionDao.findPermissionsByRoleId"/>
+        <collection property="users" column="id" select="com.itheima.dao.IUserDao.findByRoleId"
+                    ofType="com.itheima.domain.UserInfo" fetchType="lazy" autoMapping="true"/>
+    </resultMap>
+    <select id="findById" parameterType="string" resultMap="role_details">
+        SELECT *
+        FROM ROLE
+        WHERE ID = #{id}
+    </select>
+
+    <!--根据角色id查询可以添加的权限信息-->
+    <resultMap id="permission_roles" type="com.itheima.domain.Permission" autoMapping="true">
+        <id property="id" column="id"></id>
+        <collection property="roles" column="id" autoMapping="true" ofType="com.itheima.domain.Role" fetchType="lazy"
+                    select="com.itheima.dao.IRoleDao.findByPermissionId"/>
+    </resultMap>
+    <select id="findAdditablePermission" parameterType="string" resultMap="permission_roles">
+        SELECT *
+        FROM PERMISSION
+        WHERE ID NOT IN (SELECT PERMISSIONID
+                         FROM ROLE_PERMISSION
+                         WHERE ROLEID = #{id})
+    </select>
+
+    <!--根据权限id查询角色-->
+    <select id="findByPermissionId" resultType="com.itheima.domain.Role" parameterType="string">
+        SELECT *
+        FROM ROLE
+        WHERE ID IN (SELECT ROLEID
+                     FROM ROLE_PERMISSION
+                     WHERE PERMISSIONID = #{id})
+    </select>
+
+    <!--给角色添加权限,在中间表中插入数据-->
+    <insert id="addPermission" parameterType="string">
+        INSERT INTO ROLE_PERMISSION (ROLEID, PERMISSIONID) VALUES (#{roleId}, #{id})
+    </insert>
+</mapper>

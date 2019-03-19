@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.IUserDao">
+    <resultMap id="userInfo_role" type="com.itheima.domain.UserInfo" autoMapping="true">
+        <collection property="roles" column="id" javaType="java.util.List" ofType="com.itheima.domain.Role"
+                    autoMapping="true" fetchType="lazy" select="com.itheima.dao.IRoleDao.findByUserInfoId"/>
+    </resultMap>
+    <!--根据用户名查询用户-->
+    <select id="findByUsername" parameterType="string" resultMap="userInfo_role">
+        SELECT *
+        FROM USERINFO
+        WHERE USERNAME = #{username}
+    </select>
+
+    <!--查询所有用户-->
+    <select id="findAll" resultType="com.itheima.domain.UserInfo">
+        SELECT *
+        FROM USERINFO
+    </select>
+
+    <!--添加用户-->
+    <insert id="add" parameterType="com.itheima.domain.UserInfo">
+        INSERT INTO USERINFO (EMAIL, USERNAME, PASSWORD, PHONENUM, STATUS)
+        VALUES (#{email}, #{username}, #{password}, #{phoneNum}, #{status})
+    </insert>
+
+    <resultMap id="user_details" type="com.itheima.domain.UserInfo" autoMapping="true">
+        <collection property="roles" column="id" select="com.itheima.dao.IRoleDao.findByUserInfoId"
+                    ofType="com.itheima.domain.Role" fetchType="lazy" autoMapping="true" javaType="java.util.List"/>
+    </resultMap>
+    <!--根据id查询用户-->
+    <select id="findById" parameterType="String" resultMap="user_details">
+        SELECT *
+        FROM USERINFO
+        WHERE ID = #{id}
+    </select>
+
+    <!--根据角色id查用户-->
+    <select id="findByRoleId" resultType="com.itheima.domain.UserInfo" parameterType="string">
+        SELECT *
+        FROM USERINFO
+        WHERE ID IN (SELECT USERID
+                     FROM USERINFO_ROLE
+                     WHERE ROLEID = #{id})
+    </select>
+
+    <!--根据用户id查询可以添加的角色集合-->
+    <select id="findAdditableRoles" resultType="com.itheima.domain.Role" parameterType="string">
+        SELECT *
+        FROM ROLE
+        WHERE ID NOT IN (SELECT ROLEID
+                         FROM USERINFO_ROLE
+                         WHERE USERID = #{id})
+    </select>
+
+    <!--给用户添加一个角色-->
+    <insert id="addRole" parameterType="string">
+        INSERT INTO USERINFO_ROLE VALUES (#{userId}, #{id})
+    </insert>
+</mapper>

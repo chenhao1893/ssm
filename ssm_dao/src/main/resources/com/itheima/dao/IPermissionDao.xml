@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.IPermissionDao">
+
+    <!--查询所有-->
+    <select id="findAll" resultType="com.itheima.domain.Permission" >
+        SELECT * FROM PERMISSION
+    </select>
+
+    <!--添加权限-->
+    <insert id="add" parameterType="com.itheima.domain.Permission">
+        INSERT INTO PERMISSION(PERMISSIONNAME,URL) VALUES (#{permissionName},#{url})
+    </insert>
+
+    <!--根据role的id查询permissions-->
+    <select id="findPermissionsByRoleId" parameterType="String" resultType="com.itheima.domain.Permission">
+        SELECT * FROM PERMISSION WHERE ID IN (SELECT PERMISSIONID FROM ROLE_PERMISSION WHERE ROLEID = #{id} )
+    </select>
+
+    <select id="findById" parameterType="string" resultType="com.itheima.domain.Permission">
+        SELECT * FROM PERMISSION WHERE ID = #{id}
+    </select>
+</mapper>

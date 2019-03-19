@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.dao.ILoggerDao">
+
+    <!--添加一条日志-->
+    <insert id="save" parameterType="com.itheima.domain.SysLog">
+        INSERT INTO SYSLOG (VISITTIME, USERNAME, IP, URL, EXECUTIONTIME, METHOD)
+        VALUES (#{visitTime}, #{username}, #{ip}, #{url}, #{executionTime}, #{method})
+    </insert>
+
+    <!--查询所有日志信息-->
+
+    <select id="findAll" resultType="com.itheima.domain.SysLog">
+        SELECT * FROM SYSLOG ORDER BY VISITTIME ASC
+    </select>
+</mapper>
